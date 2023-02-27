@@ -1,0 +1,96 @@
+form{
+    position: relative;
+    width: 700px;
+    height: 400px;
+    margin:auto;
+    margin-top: calc(10vh + 60px);
+    background-color: #D5E7FF;
+    border-radius: 10px;
+    padding:30px 3%;
+    color:#5E7C95;
+    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.3)
+}
+p.common-info{
+    position: absolute;
+    width:max-content;
+    height: max-content;
+    color: green;
+    top:0;
+    left:50%;
+    transform: translate(-50%,-100%);
+    font-size: 18px;
+}
+/* 全局设置 */
+label,input:not([type='radio'],[type='checkbox']){
+    height: 25px;
+    margin-top: 10px;
+}
+label,span{
+    font-size: 18px;
+}
+form {
+    user-select: none;
+}
+.check,.email{
+    padding-left: 12px;
+    padding-top: 8px;
+}
+/* save option */
+.save{
+    margin-left: 5px;
+}
+.save>label{
+    padding-left: 5px;
+}
+/* url输入框 */
+p:has(textarea){
+    text-align: center;
+}
+textarea{
+    resize: none;
+    font-size: 13.5px;
+    width: 98%;
+}
+textarea::before{
+    content: "*ddddddd";
+    color: red;
+}
+/* url的错误信息 */
+.error-area{
+    color: red;
+    position: relative;
+}
+/* email div */
+.email input[type=email]{
+    width: 200px;
+}
+.email input[type=number]{
+    width: 90px;
+    margin-left: 5px;
+}
+.email input[type=radio]+label{
+    padding-left: 5px;
+    color: #2454d9;
+}
+.email-option>p{
+    padding-top: 15px;
+    padding-bottom: 6px;
+}
+/* check div */
+.check input[type=number]{
+    width: 90px;
+}
+/* 提交按钮 */
+button.submit{
+    border: none;
+    padding: 10px 25px;
+    font-size: 1.4em;
+    border-radius: 6px;
+    background-color:#67C0E7;
+    color: white;
+    cursor:pointer;
+    position: absolute;
+    bottom: 30px;
+    left:50%;
+    transform: translateX(-50%);
+}

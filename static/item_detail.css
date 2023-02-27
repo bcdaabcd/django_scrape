@@ -1,0 +1,76 @@
+.con{
+    margin:calc(5vh + 60px) auto 30vh;
+    width: 75vw;
+    display: flex;
+    justify-content: space-between;
+}
+.con a{
+    text-decoration: none;
+    color: rgb(77, 150, 222);
+}
+.con a:hover{
+    text-decoration: underline;
+}
+.con .top{
+    border-bottom: 1px #d5d5d5 solid;
+    padding-bottom: 1em;
+}
+/* left top */
+.left{
+    flex:1 0 70%;
+    background-color: #fff;
+    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
+    padding:15px 50px 40px;
+}
+.left h2 a{
+    margin-left: 15px;
+}
+/* left item-info */
+.item-info{
+    height: max-content;
+    padding: 20px 0 10px;
+}
+.pictures>a>img{
+    max-height:250px;
+}
+.name{
+    margin-top: 10px;
+    font-size: 18px;
+}
+/* left redord-total-info */
+.record-total{
+    padding-top: 20px;
+    border-top:1px #d5d5d5 solid;
+    display: flex;
+}
+.record-total>p:last-child{
+    padding-left: 50px;
+}
+/* left records */
+.table-con{
+    padding:3vh 0;
+}
+table.record{
+    border-collapse: collapse;
+}
+table.record :is(th,tt,td){
+    border: 1px black solid;
+}
+th,td{
+    padding:3px 20px;
+}
+
+/* right */
+.right{
+    flex: 0 0 0;
+}
+@media(max-width:1000px){
+    .right{
+        display: none;
+        flex:0 0 0;
+    }
+    .left{
+        flex:0 0 100%;
+    }
+}
+

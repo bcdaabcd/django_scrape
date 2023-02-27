@@ -1,0 +1,226 @@
+.con{
+    margin:calc(5vh + 60px) auto 10vh;
+    width: 85vw;
+    display: flex;
+    justify-content: space-between;
+    min-width: 400px;
+    word-break: break-all;
+}
+.con a{
+    text-decoration: none;
+    color: rgb(77, 150, 222);
+}
+.con a:hover{
+    text-decoration: underline;
+}
+.con .top{
+    border-bottom: 1px #d5d5d5 solid;
+    padding-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+/* button */
+.top button{
+    border: none;
+    padding:0 6px;
+    height: 30px;
+    background-color:rgba(135,206,235,0.8);
+    border-radius: 5px;
+    font-size: 15px;
+    cursor: pointer;
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+.top button:hover{
+    opacity: 0.7;
+}
+.top button:active{
+    transform: translate(1px,1px);
+    box-shadow: unset;
+    transition:0.1s;
+}
+.top button abbr{
+    text-decoration: none;
+}
+.buttons{
+    display: flex;
+    gap: 15px;
+}
+/* left */
+.left{
+    flex:0 1 67%;
+    background-color: #fff;
+    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
+    padding:15px 30px 40px;
+    position: relative;
+}
+.left>p.common-info{
+    position: absolute;
+    width:max-content;
+    height: max-content;
+    color: green;
+    top:0;
+    left:50%;
+    transform: translate(-50%,-100%);
+    font-size: 18px;
+}
+/* item */
+.item{
+    border-bottom: 1px #d5d5d5 solid;
+    padding:15px 0 0;
+}
+form.fav-form{
+    display: none;
+}
+.item-info{
+    display: flex;
+    margin: 6px 0 10px;
+}
+/* item price-info */
+.price-info{
+    flex:0 0 max-content;
+    margin-right:12%;
+    margin-left: 3.5%;
+}
+    .price-info>.price-info-detail>p>span:first-child{
+        display: inline-block;
+        width: 90px;
+    }
+    .price-info>.price-info-detail>p>span:last-child{
+        display: inline-block;
+    }
+.other-info{
+    flex:1 1 auto;
+}
+    .other-info>p>span:first-child{
+        display: inline-block;
+        width: 50px;
+    }
+    .other-info>p>span:last-child{
+        display: inline-block;
+    }
+.love{
+    color:#ccc;
+    cursor: pointer;
+    font-size: 30px;
+    user-select: none;
+    flex: 0 0 0;
+    margin-top: -15px;
+}
+.love.selected{
+    color: #f22;
+}
+/* item record-date */
+.item p.record-date{
+    margin-top: 10px;
+}
+.item span.record-date{
+    color: #888;
+}
+span.delete{
+    color: #22f;
+    float: right;
+    cursor: pointer;
+}
+span.delete:hover{
+    text-decoration: underline;
+}
+/* right */
+.right{
+    flex: 0 1 28%;
+}
+.right>.favorite{
+    background-color: #fff;
+    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
+    padding:10px 20px 20px ;
+    height: max-content;
+}
+.favorite-item{
+    padding: 6px 0;
+    border-bottom: #d5d5d5 1px solid;
+}
+/* search-con */
+.search-con{
+    background-color: #fff;
+    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
+    margin-top: 20px;
+    height: 40px;
+    position: sticky;
+    top: calc(60px + 4vh);
+    border-radius: 20px;
+    overflow: hidden;
+}
+.search{
+    height: 100%;
+    width: 100%;
+    position: relative;
+}
+.search>input[type=search]{
+    border: none;
+    height: 100%;
+    width: 87%;
+    padding-left: 15px;
+    outline: none;
+    font-size: 15px;
+}
+.search>button[type=submit]{
+    border: none;
+    height: 100%;
+    width: 13%;
+    position: absolute;
+    right: 0;
+    background-color: transparent;
+    background-image: url(search.svg);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+/* page-nav */
+div.page-nav{
+    margin:50px 0 200px 10.2vw;
+}
+div.page-nav ul{
+    background-color: #fff;
+    list-style-type: none;
+    display: flex;
+    border-radius: 5px;
+    overflow: hidden;
+    width: max-content;
+    border: 2px #ddd solid;
+    border-collapse: collapse;
+}
+div.page-nav ul li{
+    height: 35px;
+    width: 40px;
+    text-align: center;
+    user-select:none;
+}
+div.page-nav ul li a{
+    display: inline-block;
+    padding-top: 6px;
+    height: 35px;
+    width: 40px;
+    text-decoration: none;
+    color:rgb(82, 124, 150);
+}
+div.page-nav ul li:not(:last-child) a{
+    border-right:2px #ddd solid;
+}
+div.page-nav ul li a:hover{
+    background-color: #eee;
+}
+div.page-nav ul li a.active{
+    color:white;
+    background-color:#3581C3
+}
+/* 下方的页面信息 */
+.fo{
+    margin-top: 30px;
+}
+@media(max-width:900px){
+    .right{
+        display: none;
+        flex:0 0 0;
+    }
+    .left{
+        flex:0 0 100%;
+    }
+}

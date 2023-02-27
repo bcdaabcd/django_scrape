@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Scrape | List
+{% endblock %}
+
+{% load task_tags %}
+
+{% block header_extends %}
+<link rel="stylesheet" href="{% static 'task_list.css' %}">
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
+{% endblock %}
+
+{% block body %}
+<div class="con">
+    <div class="left">
+        <div class="top">
+            <h2>{{ task_number }} Tasks | {{ typename }}&nbsp;<a href="{% url 'task_list' %}">Back</a></h2>
+            <div class="all">
+                <div class="buttons">
+                    <button onclick="start_or_stop_all(this)" data-from="task_with_category" data-action="start">Start all</button>
+                    <button onclick="start_or_stop_all(this)" data-from="task_with_category" data-action="stop">Stop all</button>
+                </div>
+            </div>
+        </div>
+        {% for task in cur_page.object_list %}
+        <div class="task">
+            <div class="name">
+                <a href="{% url 'item_detail' task.item.id %}">{{ task.item.name|truncatechars:120 }}</a>
+            </div>
+            <div class="info">
+                <div class="info-inner">
+                    <div class="time">
+                        <p><span>{{task.type}}: </span><span>{{task.interval.every}} {{task.interval.period}}</span></p>
+                    </div>
+                    <div class="other">
+                        <p><span>send to: </span><span>{{task.email|default_if_none:"-"}}</span></p>
+                    </div>
+                </div>
+                <div class="button {% task_status task %}" onclick="change_task_status(this,'{{task.id}}')"><div></div></div>
+            </div>
+            <p>
+                <span>start from: </span><span class="start-date">{{task.start_time|date:"Y-m-d H:i:s"}}</span>
+                <span class="delete" onclick="delete_obj(this,'{{task.id}}')" data-from="task_with_category">delete</span>
+            </p>
+        </div>
+        {% empty %}
+        <h3 style="font-weight: normal;">No Task</h3>
+        {% endfor %}
+    </div>
+    <div class="right">
+        <div class="search-con">
+            <div class="search">
+                <input  type="search" data-from="task-with-category">
+                <button type="submit"></button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="page-nav">
+    <ul>
+        <li>
+            {% if cur_page.has_previous %}
+            <a href="?page={{ page_of_blogs.previous_page_number }}">&lt&lt</a>
+            {% else %}
+            <a>&lt&lt</a>
+            {% endif %}
+        </li>
+        {% for page_num in page_range %}
+            {% if page_num == cur_page.number %}
+            <li><a class="active">{{ page_num }}</a></li>
+            {% else %}
+                {% if page_num == "..." %}
+                <li><a>{{ page_num }}</a></li>
+                {% else %}
+                <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        <li>
+            {% if cur_page.has_next %}
+            <a href="?page={{ page_of_blogs.next_page_number }}">&gt&gt</a>
+            {% else %}
+            <a>&gt&gt</a>
+            {% endif %}
+        </li>
+    </ul>
+    <p class="fo">There are {{ cur_page.paginator.count }} tasks, you are on the page {{ cur_page.number }} of {{ cur_page.paginator.num_pages }}</p>
+</div>
+{% endblock %}
+{% block script %}
+<script>
+// delete
+const url_delete_obj = "{% url 'delete_obj' %}"
+// search
+const url_search = "{% url 'search' %}";
+const url_from = "{% url 'task_with_category' category_id %}";
+// 一键开始/停止任务
+const category_id = '{{ category_id }}';
+const url_start_or_stop_all = "{% url 'start_or_stop_all' %}";
+const url_change_task_status = "{% url 'change_task_status' %}";
+</script>
+<script src="{% static 'js/task_common.js' %}"></script>
+<script src="{% static 'js/all_list_common.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Query
+{% endblock %}
+
+{% block header_extends %}
+<link rel="stylesheet" href="{% static 'input.css' %}">
+{% endblock %}
+
+{% block body %}
+<form method="POST">
+    {% csrf_token %}
+    <p class="common-info"></p>
+    <p class="save"><input type="checkbox" checked name="save" id="save"><label for="save">save this item and record</label></p>
+    <p>
+        <textarea required name="url" rows="5" placeholder="please input url here"></textarea>
+    </p>
+    <p class="error-area">{{ error_info }}</p>
+    <div class="check">
+        <input type="checkbox" id="periodic_check" name="periodic_check" value="periodic_check">
+        <label for="periodic_check">
+            <span>check the price every</span>
+            <input type="number" min="1" max="500" id="interval_num" name="interval_num" step="1">
+            <select name="interval_period">
+                <option value="seconds">second(s)</option>
+                <option value="minutes">minute(s)</option>
+                <option value="hours">hour(s)</option>
+                <option value="days">day(s)</option>
+                <option value="week">week(s)</option>
+                <option value="month">month(s)</option>
+            </select>
+            <span>and save the record</span>
+        </label>
+    </div>
+    <div class="email">
+        <p><label for="email">email: </label><input id="email" name="email" type="email"></p>
+        <div class="email-option">
+            <p>
+                <input type="checkbox" name="email_every_check" id="email-when-check">
+                <label for="email-when-check">send me an email every time we check the price</label>
+            </p>
+            <span>send me an email when price</span>
+            <input type="radio" name="email_when_price" value="price_drop" id="dr"><label for="dr">dropped</label>
+            <input type="radio" name="email_when_price" value="price_lower_than" id="lt"><label for="lt">lower than</label>
+            <input type="number" min="1" name="price_lt" >&nbsp;<span>¥</span>
+        </div>
+    </div>
+    <button type="submit" class="submit" >submit</button>
+</form>
+<p>{{ item_info }}</p>
+<p>periodic_check: {{ periodic_check }}</p>
+<p>every {{ time_num }} {{ interval_period }}</p>
+<p>email_every_check: {{ email_every_check }}</p>
+<p>email_when_price: {{ email_when_price }}</p>
+<p>price_lt: {{ price_lt }}</p>
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'js/input.js' %}"></script>
+{% endblock %}

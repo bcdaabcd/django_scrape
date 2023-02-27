@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Scrape | Detail
+{% endblock %}
+
+{% block header_extends %}
+<link rel="stylesheet" href="{% static 'item_detail.css' %}">
+{% endblock %}
+
+{% block body %}
+<div class="con">
+    <div class="left">
+        <div class="top"><h2>({{ record_num }}) Records<a href="{% url 'item_list' %}">Back</a></h2></div>
+        <div class="item-info">
+            <p class="pictures">
+                {% for src in srcs %}
+                <a href="{{ item.url }}" target="_blank">
+                <img src="{{ src }}" alt="no picture"></a>
+                {% endfor %}
+            </p>
+            <p class="name"><a href="{{ item.url }}" target="_blank">{{ item.name }}</a></p>
+        </div>
+        <div class="record-total">
+            <p>lowest: {{ min_price }}</p>
+            <p>highest: {{ max_price }}</p>
+        </div>
+        <div class="table-con">
+            <table class="record">
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>price</th>
+                        <th>price change</th>
+                        <th>time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for values in record_values reversed %}
+                    <tr>
+                        <td>{{ values.per_id }}</td>
+                        <td>{{ values.price }}</td>
+                        <td style="text-align:center;" class="price_change">{{ values.price_change }}{{ values.change_rate }}</td>
+                        <td>{{ values.scrape_time|date:"Y-m-d H:i:s" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="right">
+
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+<script>
+let pc = $('td.price_change');
+for(let i=0;i<pc.length;i++){
+    te = pc[i].textContent;
+    if(/↑/.test(te)){
+        pc[i].style.color = "#f22"
+        pc[i].style.fontWeight = "bold"
+    }else if(/↓/.test(te)){
+        pc[i].style.color = "green"
+        pc[i].style.fontWeight = "bold"
+    }
+}
+</script>
+{% endblock %}
+

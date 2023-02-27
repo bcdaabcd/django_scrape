@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Scrape | List
+{% endblock %}
+
+{% block header_extends %}
+<link rel="stylesheet" href="{% static 'item_list.css' %}">
+{% endblock %}
+
+{% block body %}
+<div class="con">
+    <div class="left">
+        <p class="common-info">
+            {% if messages %}
+                {% for m in messages %}
+                    <span>{%if m.level == DEFAULT_MESSAGE_LEVELS.SUCCESS%}{{m}}{%endif%}</span>
+                    <span style="color:red">{%if m.level == DEFAULT_MESSAGE_LEVELS.ERROR%}{{m}}{%endif%}</span>
+                {% endfor %}
+            {% endif %}
+        </p>
+        <div class="top">
+            <h2>{{ item_number }} Items</h2>
+            <div class="check_all">
+                <form action="{% url 'check_all' %}" class="check_all" method="post" id="check_all_form">
+                    {% csrf_token %}
+                    <input type="hidden" name="check" value="all_fav_list">
+                </form>
+                <button class="check_all" id="check_all"><abbr title="Get The Newest Data Of All Items">check all</abbr></button>
+            </div>
+        </div>
+        {% for item in cur_page.object_list %}
+        <div class="item">
+            <div class="item-name">
+                ({{ item.record_num }})&nbsp;<a href="{% url 'item_detail' item.pk %}">{{ item.name|truncatechars:120 }}</a>
+            </div>
+            <div class="item-info">
+                <div class="price-info">
+                    <div class="price-info-detail">
+                        <p><span>last price:</span><span>{{ item.last_price }}</span></p>
+                        <p><span>lowest:</span><span>{{ item.min_price }}</span></p>
+                        <p><span>highest:</span><span>{{ item.max_price }}</span></p>
+                    </div>
+                </div>
+            </div>            
+            <p class="record-date">
+                from <span class="record-date">{{ item.first_record_date|date:"Y-m-d" }}</span> to <span class="record-date">{{ item.last_record_date|date:"Y-m-d" }}</span>
+                <span class="delete" onclick="delete_obj(this,'{{item.id}}')" data-from="favorite_list">delete</span>
+            </p>
+        </div>
+        {% empty %}
+        <p>no record</p>
+        {% endfor %}
+    </div>
+    <div class="right">
+        <div class="search-con" style="margin-top: unset;">
+            <div class="search">
+                <input  type="search" data-from="fav-list">
+                <button type="submit"></button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="page-nav">
+    <ul>
+        <li>
+            {% if cur_page.has_previous %}
+            <a href="?page={{ page_of_blogs.previous_page_number }}">&lt&lt</a>
+            {% else %}
+            <a>&lt&lt</a>
+            {% endif %}
+        </li>
+        {% for page_num in page_range %}
+            {% if page_num == cur_page.number %}
+            <li><a class="active">{{ page_num }}</a></li>
+            {% else %}
+                {% if page_num == "..." %}
+                <li><a>{{ page_num }}</a></li>
+                {% else %}
+                <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        <li>
+            {% if cur_page.has_next %}
+            <a href="?page={{ page_of_blogs.next_page_number }}">&gt&gt</a>
+            {% else %}
+            <a>&gt&gt</a>
+            {% endif %}
+        </li>
+    </ul>
+    <p class="fo">There are {{ cur_page.paginator.count }} items, you are on the page {{ cur_page.number }} of {{ cur_page.paginator.num_pages }}</p>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+// delete
+const url_delete_obj = "{% url 'delete_obj' %}";
+// search
+const category_id = null;
+const url_search = "{% url 'search' %}";
+const url_from = "{% url 'favorite_list' %}";
+// 一键查询
+let check_all_form=document.querySelector("form#check_all_form");
+let check_all_bu=document.querySelector("button#check_all");
+check_all_bu.onclick=function(){
+    check_all_form.submit();
+}
+</script>
+<script src="{% static 'js/all_list_common.js' %}"></script>
+{% endblock %}

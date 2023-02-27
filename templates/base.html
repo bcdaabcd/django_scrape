@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'base.css' %}">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
+    {% block header_extends %}{% endblock %}
+</head>
+<body>
+<nav>
+    <a class="logo" href="{% url 'url_input' %}"><h2>Welcome</h2></a>
+    <a href="{% url 'url_input' %}">Scrape</a>
+    <a href="{% url 'item_list' %}">Items</a>
+    <a href="{% url 'favorite_list' %}">Favorites</a>
+    <a href="{% url 'task_list' %}">Tasks</a>
+</nav>
+{% block body %}
+{% endblock %}
+
+{% block script %}
+{% endblock %}
+</body>
+</html>

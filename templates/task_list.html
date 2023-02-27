@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Scrape | List
+{% endblock %}
+
+{% load task_tags %}
+
+{% block header_extends %}
+<link rel="stylesheet" href="{% static 'task_list.css' %}">
+{% endblock %}
+
+{% block body %}
+<div class="con">
+    <div class="left">
+        <p class="common-info">
+        <div class="top">
+            <h2>{{ task_number }} Tasks</h2>
+            <div class="check_all">
+                <div class="buttons">
+                    <button onclick="start_or_stop_all(this)" data-from="task_list" data-action="start">Start all</button>
+                    <button onclick="start_or_stop_all(this)" data-from="task_list" data-action="stop">Stop all</button>
+                </div>
+            </div>
+        </div>
+        {% for task in cur_page.object_list %}
+        <div class="task">
+            <div class="name">
+                <a href="{% url 'item_detail' task.item.id %}">{{ task.item.name|truncatechars:120 }}</a>
+            </div>
+            <div class="info">
+                <div class="info-inner">
+                    <div class="time">
+                        <p>
+                            <span>interval: </span><span>{{task.interval.every}}</span>
+                            &nbsp;<span class="before-edit">{{task.interval.period}}</span>
+                            <span class="edit" onclick="task_info_edit(this,'{{task.id}}')" data-target="interval">edit</span>
+                        </p>
+                    </div>
+                    <div class="other">
+                        <p><span>send to: </span><span class="before-edit">{{task.email|default:"None"}}</span>
+                            <span class="edit" onclick="task_info_edit(this,'{{task.id}}')" data-target="email">edit</span>
+                        </p>
+                        <p><span>schedule: </span><span>{{task.type}}</span></p>
+                    </div>
+                </div>
+                <div class="button {% task_status task %}" onclick="change_task_status(this,'{{task.id}}')"><div></div></div>
+            </div>
+            <p>
+                <span>start from: </span><span class="start-date">{{task.start_time|date:"Y-m-d H:i:s"}}</span>
+                <span class="delete" onclick="delete_obj(this,'{{task.id}}')" data-from="task_list">delete</span>
+            </p>
+        </div>
+        {% empty %}
+        <h3 style="font-weight: normal;">No Task</h3>
+        {% endfor %}
+    </div>
+    <div class="right">
+        <div class="categories">
+            <div class="top">
+                <h2>categories</h2>
+            </div>
+            <div class="category-list">
+                {% for ct in categories %}
+                <div class="category">
+                    <p><a href="{% url 'task_with_category' ct.id %}">{{ ct.name }}</a></p>
+                </div>
+                {% empty %}
+                <p class="no-category">no category</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="search-con">
+            <div class="search">
+                <input  type="search" data-from="task-list">
+                <button type="submit"></button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="page-nav">
+    <ul>
+        <li>
+            {% if cur_page.has_previous %}
+            <a href="?page={{ page_of_blogs.previous_page_number }}">&lt&lt</a>
+            {% else %}
+            <a>&lt&lt</a>
+            {% endif %}
+        </li>
+        {% for page_num in page_range %}
+            {% if page_num == cur_page.number %}
+            <li><a class="active">{{ page_num }}</a></li>
+            {% else %}
+                {% if page_num == "..." %}
+                <li><a>{{ page_num }}</a></li>
+                {% else %}
+                <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        <li>
+            {% if cur_page.has_next %}
+            <a href="?page={{ page_of_blogs.next_page_number }}">&gt&gt</a>
+            {% else %}
+            <a>&gt&gt</a>
+            {% endif %}
+        </li>
+    </ul>
+    <p class="fo">There are {{ cur_page.paginator.count }} tasks, you are on the page {{ cur_page.number }} of {{ cur_page.paginator.num_pages }}</p>
+</div>
+{% endblock %}
+{% block script %}
+<script>
+// edit
+const url_task_info_edit = "{% url 'task_info_edit' %}";
+let new_interval_n = null;
+let new_interval_p = null;
+let new_email = null;
+
+function task_info_edit(thi,task_id){
+    let edit_target = thi.dataset.target;
+    if(thi.textContent === 'edit'){
+        if(thi.previousElementSibling.tagName === 'SPAN' && edit_target === 'email'){
+            let obj = thi.previousElementSibling;
+            let old_value = obj.textContent.trim();
+            console.log('before value: '+obj.textContent.trim());
+            if(old_value){
+                obj.outerHTML = `<input>`
+            }else{
+                obj.outerHTML = `<input value='${old_value}'>`;
+            }
+        }else if(thi.previousElementSibling.tagName === 'SPAN' && edit_target === 'interval'){
+            let obj_p = thi.previousElementSibling;
+            let p_old_value = obj_p.textContent.trim();
+            let obj_n = thi.previousElementSibling.previousElementSibling;
+            let n_old_value = obj_n.textContent.trim();
+            obj_p.outerHTML = `
+                <select>
+                    <option value="seconds">seconds</option>
+                    <option value="minutes">minutes</option>
+                    <option value="hours">hours</option>
+                    <option value="days">days</option>
+                </select>`;
+            obj_n.outerHTML = `<input type='number' min=1 max='500' step=1 value='${n_old_value}' style="width:60px">`;
+        }
+        thi.textContent = "save";
+    }else if(thi.textContent === 'save'){
+        if(thi.previousElementSibling.tagName == 'INPUT' && edit_target === 'email'){
+            new_email = thi.previousElementSibling.value;
+            if(new_email){
+                thi.previousElementSibling.outerHTML = `<span>${new_email}</span>`
+            }else{
+                thi.previousElementSibling.outerHTML = `<span>None</span>`
+            }
+            console.log('after email: '+new_email);
+        }else if(thi.previousElementSibling.previousElementSibling.tagName == 'INPUT' && edit_target === 'interval'){
+            new_interval_n = thi.previousElementSibling.previousElementSibling.value;
+            new_interval_p = thi.previousElementSibling.value;
+            if(new_interval_n > 500 || new_interval_n < 1){
+                $('p.common-info').text("请输入1-500的数字");
+            }else{
+                thi.previousElementSibling.previousElementSibling.outerHTML = `<span>${new_interval_n}</span>`;
+                new_interval_p = thi.previousElementSibling.value;
+                thi.previousElementSibling.outerHTML = `<span>${new_interval_p}</span>`;
+                thi.textContent = 'edit';
+                console.log(`after interval: ${new_interval_n} ${new_interval_p}`);
+            }
+        }
+        if(thi.previousElementSibling.previousElementSibling.tagName === 'SPAN' && thi.previousElementSibling.tagName === 'SPAN'){
+            $('p.common-info').text("");
+            $.ajax({
+                url: url_task_info_edit,
+                type: 'GET',
+                cache: false,
+                data:{
+                    'task_id':task_id,
+                    'target':edit_target,
+                    'new_email':new_email,
+                    'interval_num':new_interval_n,
+                    'interval_period':new_interval_p,
+                },
+                success: function(d){
+                    console.log('python返回的结果: '+d)
+                },
+                error: function(xhr){
+                    console.log(xhr);
+                }
+            });
+        }
+    }
+}
+// delete
+const url_delete_obj = "{% url 'delete_obj' %}";
+// search
+const url_search = "{% url 'search' %}";
+const url_from = "{% url 'task_list' %}";
+// 一键开始/停止任务
+const category_id = null;
+const url_start_or_stop_all = "{% url 'start_or_stop_all' %}";
+const url_change_task_status = "{% url 'change_task_status' %}";
+</script>
+<script src="{% static 'js/task_common.js' %}"></script>
+<script src="{% static 'js/all_list_common.js' %}"></script>
+{% endblock %}

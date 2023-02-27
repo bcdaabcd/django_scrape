@@ -1,0 +1,41 @@
+*{
+    padding:0;
+    margin: 0;
+    box-sizing: border-box;
+    word-break: break-all;
+}
+body{
+    background-color: #F3F2F3;
+}
+nav{
+    display: flex;
+    align-items: center;
+    background-color: #eee;
+    height: 60px;
+    padding:0 20px;
+    border-bottom: #ccc 1.5px solid;
+    white-space:nowrap ;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 10;
+}
+nav a{
+    text-decoration: none;
+    color:#777;
+}
+nav a.logo{
+    font-size:120%;
+    margin-right:20px;
+}
+nav a:hover:not(.logo){
+    background-color: #ccc;
+}
+nav a:not(.logo){
+    height: inherit;
+    text-align: center;
+    padding-top:20px;
+    font-size: 115%;
+    min-width: 115px;
+}

@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Scrape | List
+{% endblock %}
+
+{% load item_tags %}
+
+{% block header_extends %}
+<link rel="stylesheet" href="{% static 'item_list.css' %}">
+{% endblock %}
+
+{% block body %}
+<div class="con">
+    <div class="left">
+        <p class="common-info">
+            {% if messages %}
+                {% for m in messages %}
+                    <span>{%if m.level == DEFAULT_MESSAGE_LEVELS.SUCCESS%}{{m}}{%endif%}</span>
+                    <span style="color:red">{%if m.level == DEFAULT_MESSAGE_LEVELS.ERROR%}{{m}}{%endif%}</span>
+                {% endfor %}
+            {% endif %}
+        </p>
+        <div class="top">
+            <h2>{{ item_number }} Items</h2>
+            <div class="check_all">
+                <div class="buttons">
+                                <form action="{% url 'check_all' %}" class="check_all" method="post" id="check_all_form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="check" value="all_item_list">
+                                </form>
+                    <button class="check_all" id="check_all"><abbr title="Get The Newest Data Of All Items">check all</abbr></button>
+                                <form action="{% url 'check_all' %}" class="check_all" method="post" id="check_this_form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="check" value="this_page_item_list">
+                                    <input type="hidden" name="page_num" value="{{ cur_page.number }}">
+                                </form>
+                    <button class="check-this" id="check_this">check this page</button>
+                </div>
+            </div>
+        </div>
+        {% for item in cur_page.object_list %}
+        <div class="item">
+            <div class="item-name">
+                ({{ item.record_num }})&nbsp;<a href="{% url 'item_detail' item.pk %}">{{ item.name|truncatechars:120 }}</a>
+            </div>
+            <div class="item-info">
+                <div class="price-info">
+                    <div class="price-info-detail">
+                        <p><span>last price:</span><span>{{ item.last_price }}</span></p>
+                        <p><span>lowest:</span><span>{{ item.min_price }}</span></p>
+                        <p><span>highest:</span><span>{{ item.max_price }}</span></p>
+                    </div>
+                </div>
+                <div class="other-info">
+                    {% if item.size %}
+                    <p class="type"><span>type:</span><span>{{ item.size }}</span></p>
+                    {% endif %}
+                    {% if item.color %}
+                    <p class="color"><span>color:</span><span>{{ item.color }}</span></p>
+                    {% endif %}
+                </div>
+                <span class="love {% fav_status item %}" 
+                    onclick="fav_add(this,'{{item.id}}')">&#10084
+                </span>
+            </div>            
+            <p class="record-date">
+                from <span class="record-date">{{ item.first_record_date|date:"Y-m-d" }}</span> to <span class="record-date">{{ item.last_record_date|date:"Y-m-d" }}</span>
+                <span class="delete" onclick="delete_obj(this,'{{item.id}}')" data-from="item_list">delete</span>
+            </p>
+        </div>
+        {% empty %}
+        <h3 style="font-weight: normal;">No Record</h3>
+        {% endfor %}
+    </div>
+    <div class="right">
+        <div class="favorite">
+            <div class="top">
+                <h2>favorite</h2>
+                <form action="{% url 'check_all' %}" class="check_all" method="post" id="check_fav_form">
+                    {% csrf_token %}
+                    <input type="hidden" name="input_in_fav" value="1">
+                </form>
+                <button class="check_all" id="check_fav"><abbr title="Get The Newest Data Of All Below Items">check all</abbr></button>
+            </div>
+            <div class="favorite-list">
+                {% for fv in favorite_items reversed %}
+                <div class="favorite-item">
+                    <p><a href="{% url 'item_detail' fv.item.pk  %}">{{ fv.item.name|truncatechars:25 }}</a></p>
+                </div>
+                {% empty %}
+                <p class="no-fav">no favorite</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="search-con">
+            <div class="search">
+                <input  type="search" data-from="item-list">
+                <button type="submit"></button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="page-nav">
+    <ul>
+        <li>
+            {% if cur_page.has_previous %}
+            <a href="?page={{ page_of_blogs.previous_page_number }}">&lt&lt</a>
+            {% else %}
+            <a>&lt&lt</a>
+            {% endif %}
+        </li>
+        {% for page_num in page_range %}
+            {% if page_num == cur_page.number %}
+            <li><a class="active">{{ page_num }}</a></li>
+            {% else %}
+                {% if page_num == "..." %}
+                <li><a>{{ page_num }}</a></li>
+                {% else %}
+                <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        <li>
+            {% if cur_page.has_next %}
+            <a href="?page={{ page_of_blogs.next_page_number }}">&gt&gt</a>
+            {% else %}
+            <a>&gt&gt</a>
+            {% endif %}
+        </li>
+    </ul>
+    <p class="fo">There are {{ cur_page.paginator.count }} items, you are on the page {{ cur_page.number }} of {{ cur_page.paginator.num_pages }}</p>
+</div>
+{% endblock %}
+{% block script %}
+<script>
+// delete
+const url_delete_obj = "{% url 'delete_obj' %}";
+// search
+const category_id = null;
+const url_from = "{% url 'item_list' %}";
+const url_search = "{% url 'search' %}";
+// 收藏
+function fav_add(obj,item_id){
+    let in_fav = obj.classList.contains('selected');
+    if(obj.classList.contains('selected')===false){
+        obj.classList.add('selected');
+    }else{
+        obj.classList.remove('selected');
+    }
+    let aurl = "{% url 'item_detail' 0  %}";
+    detail_url = aurl.replace(/0/,item_id);
+    $.ajax({
+        url: "{% url 'fav_add' %}",
+        type: "GET",
+        data: {
+            'item_id': item_id,
+            'in_fav': in_fav,
+        },
+        cache: false,
+        success:function(d){
+            let fav_html = `<div class='favorite-item'><p><a href=${detail_url}>`
+                + (d['name'].length>24 ? d['name'].slice(0,24)+"…" : d['name'])
+                + "</a></p></div>"
+            if(d['after']){
+                if($('.favorite-list').children('p.no-fav').length === 1){
+                    $('.favorite-list').html(fav_html);
+                }else{
+                    $('.favorite-list').prepend(fav_html);
+                }
+            }else if(d['after'] === false){
+                let text = d['name'].length>24 ? d['name'].slice(0,24)+"…" : d['name']
+                let items = $('.favorite-item');
+                for(let i=0;i<items.length;i++){
+                    if(items[i].textContent.trim() === text){
+                        items[i].remove();
+                        break;
+                    }
+                }
+                if($('.favorite-list').children().length === 0){
+                    $('.favorite-list').html("<p class='no-fav'>no favorite</p>")
+                }
+            }
+            console.log(d);
+        },
+        error:function(xhr){
+            console.log(xhr);
+        }
+    });
+}
+
+// 一键查询
+let check_all_bu=document.querySelector("button#check_all");
+let check_all_form=document.querySelector("form#check_all_form");
+let check_fav_form=document.querySelector("form#check_fav_form");
+let check_fav_bu=document.querySelector("button#check_fav");
+let check_this_form=document.querySelector('form#check_this_form');
+let check_this_bu = document.querySelector('button#check_this');
+check_this_bu.addEventListener('click',function(){
+    check_this_form.submit();
+})
+check_all_bu.onclick=function(){
+    check_all_form.submit();
+}
+check_fav_bu.onclick=function(){
+    check_fav_form.submit();
+}
+</script>
+<script src="{% static 'js/all_list_common.js' %}"></script>
+{% endblock %}

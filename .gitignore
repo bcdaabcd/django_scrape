@@ -1,0 +1,4 @@
+settings.py
+celerybeat-schedule.db
+media
+__pycache__/
