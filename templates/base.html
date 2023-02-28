@@ -1,4 +1,5 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,16 +13,28 @@
 </head>
 <body>
 <nav>
-    <a class="logo" href="{% url 'url_input' %}"><h2>Welcome</h2></a>
-    <a href="{% url 'url_input' %}">Scrape</a>
-    <a href="{% url 'item_list' %}">Items</a>
-    <a href="{% url 'favorite_list' %}">Favorites</a>
-    <a href="{% url 'task_list' %}">Tasks</a>
+    <div class="nav-left">
+        <a class="logo" href="{% url 'url_input' %}"><h2>Welcome</h2></a>
+        <a href="{% url 'url_input' %}">Scrape</a>
+        <a href="{% url 'item_list' %}">Items</a>
+        <a href="{% url 'favorite_list' %}">Favorites</a>
+        <a href="{% url 'task_list' %}">Tasks</a>
+    </div>
 </nav>
+
 {% block body %}
 {% endblock %}
 
 {% block script %}
 {% endblock %}
+<script>
+$('p.user>a').click(function(){
+    if($('.user-menu').hasClass('hidden')){
+        $('.user-menu').removeClass('hidden');
+    }else{
+        $('.user-menu').addClass('hidden');
+    }
+})
+</script>
 </body>
 </html>

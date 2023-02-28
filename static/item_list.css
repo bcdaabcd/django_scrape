@@ -127,6 +127,9 @@ span.delete:hover{
 /* right */
 .right{
     flex: 0 1 28%;
+    position: sticky;
+    top:100px;
+    height: max-content;
 }
 .right>.favorite{
     background-color: #fff;
@@ -144,7 +147,6 @@ span.delete:hover{
     box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
     margin-top: 20px;
     height: 40px;
-    position: sticky;
     top: calc(60px + 4vh);
     border-radius: 20px;
     overflow: hidden;

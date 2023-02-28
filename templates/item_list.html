@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-Scrape | List
+Item List
 {% endblock %}
 
 {% load item_tags %}
@@ -43,7 +43,7 @@ Scrape | List
         {% for item in cur_page.object_list %}
         <div class="item">
             <div class="item-name">
-                ({{ item.record_num }})&nbsp;<a href="{% url 'item_detail' item.pk %}">{{ item.name|truncatechars:120 }}</a>
+                ({{ item.record_num }})&nbsp;<a href="{% url 'item_detail' item.pk %}?from={{request.get_full_path}}">{{ item.name|truncatechars:120 }}</a>
             </div>
             <div class="item-info">
                 <div class="price-info">

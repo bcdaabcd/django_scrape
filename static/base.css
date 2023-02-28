@@ -9,33 +9,83 @@ body{
 }
 nav{
     display: flex;
-    align-items: center;
-    background-color: #eee;
-    height: 60px;
-    padding:0 20px;
-    border-bottom: #ccc 1.5px solid;
-    white-space:nowrap ;
+    justify-content: space-between;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     z-index: 10;
+    height: 60px;
+    background-color: #eee;
+    border-bottom: #ccc 1.5px solid;
 }
 nav a{
     text-decoration: none;
-    color:#777;
+    color:#999;
+    cursor: pointer;
+    user-select: none;
 }
-nav a.logo{
-    font-size:120%;
-    margin-right:20px;
+nav .nav-left{
+    flex:0 0 max-content;
+    height: inherit;
+    padding:0 20px;
+    display: flex;
+    align-items: center;
+    white-space:nowrap ;
 }
-nav a:hover:not(.logo){
-    background-color: #ccc;
-}
-nav a:not(.logo){
+nav .nav-left a:not(.logo){
+    font-size: 115%;
     height: inherit;
     text-align: center;
-    padding-top:20px;
-    font-size: 115%;
-    min-width: 115px;
+    padding-top:19px;
+    min-width: 100px;
 }
+nav .nav-left a.logo{
+    font-size:120%;
+    margin-right:15px;
+}
+nav .nav-left a:hover:not(.logo){
+    background-color: #ccc;
+}
+/* 右边 */
+nav .nav-sign{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap:15px;
+    padding-right: 20px;
+}
+/* 未登录 */
+.nav-sign a:hover{
+    color: #666;
+    transition: 0.3s;
+}
+.user>a{
+    width: 100%;
+}
+/* 已登录 */
+.user-menu{
+    position: absolute;
+    height: 65px;
+    width: 90px;
+    top:-5px;
+    right:10px;
+    transform: translate(0,80%);
+    background-color: white;
+    font-size: 14px;
+    text-align: center;
+    display: flex;
+    flex-flow: column;
+    justify-content: space-around;
+    user-select: none;
+    z-index: 20;
+    padding-top: 4px;
+}
+.user-menu a{
+    color:#999;
+    cursor: pointer;
+}
+.hidden{
+    display: none;
+}
+

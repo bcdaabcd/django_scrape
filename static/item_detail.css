@@ -1,6 +1,6 @@
 .con{
     margin:calc(5vh + 60px) auto 30vh;
-    width: 75vw;
+    width: 80vw;
     display: flex;
     justify-content: space-between;
 }
@@ -43,8 +43,26 @@
     border-top:1px #d5d5d5 solid;
     display: flex;
 }
-.record-total>p:last-child{
-    padding-left: 50px;
+.record-total>p:first-child{
+    padding-right: 50px;
+}
+.record-total>p:nth-of-type(2){
+    flex:1 0 auto;
+}
+p.merge{
+    position: sticky;
+    height: max-content;
+    float: right;
+    background-color: rgba(135,206,235,0.8);
+    border-radius: 5px;
+    top:100px;
+    padding:5px 10px;
+    font-size: 14px;
+    user-select: none;
+    cursor: pointer;
+}
+p.merge:active{
+    opacity: 0.7;
 }
 /* left records */
 .table-con{
@@ -52,14 +70,14 @@
 }
 table.record{
     border-collapse: collapse;
+    white-space: nowrap;
 }
 table.record :is(th,tt,td){
     border: 1px black solid;
 }
 th,td{
-    padding:3px 20px;
+    padding:3px 3vw;
 }
-
 /* right */
 .right{
     flex: 0 0 0;

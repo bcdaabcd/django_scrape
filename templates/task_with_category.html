@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-Scrape | List
+Task | {{category.name}}
 {% endblock %}
 
 {% load task_tags %}
@@ -16,7 +16,7 @@ Scrape | List
 <div class="con">
     <div class="left">
         <div class="top">
-            <h2>{{ task_number }} Tasks | {{ typename }}&nbsp;<a href="{% url 'task_list' %}">Back</a></h2>
+            <h2>{{ task_number }} Tasks | {{category.name}}&nbsp;<a href="{% url 'task_list' %}">Back</a></h2>
             <div class="all">
                 <div class="buttons">
                     <button onclick="start_or_stop_all(this)" data-from="task_with_category" data-action="start">Start all</button>
@@ -27,15 +27,21 @@ Scrape | List
         {% for task in cur_page.object_list %}
         <div class="task">
             <div class="name">
-                <a href="{% url 'item_detail' task.item.id %}">{{ task.item.name|truncatechars:120 }}</a>
+                <a href="{% url 'item_detail' task.item.id %}?from={{request.get_full_path}}">{{ task.item.name|truncatechars:120 }}</a>
             </div>
             <div class="info">
                 <div class="info-inner">
                     <div class="time">
-                        <p><span>{{task.type}}: </span><span>{{task.interval.every}} {{task.interval.period}}</span></p>
+                        <p>
+                            <span>interval: </span><span>{{task.interval.every}} {{task.interval.period}}</span>
+                            <span class="edit" onclick="task_info_edit(this,'{{task.id}}')" data-target="interval">edit</span>
+                        </p>
                     </div>
                     <div class="other">
-                        <p><span>send to: </span><span>{{task.email|default_if_none:"-"}}</span></p>
+                        <p>
+                            <span>send to: </span><span>{{task.email|default:""|default_if_none:""}}</span>
+                            <span class="edit" onclick="task_info_edit(this,'{{task.id}}')" data-target="email">edit</span>
+                        </p>
                     </div>
                 </div>
                 <div class="button {% task_status task %}" onclick="change_task_status(this,'{{task.id}}')"><div></div></div>
@@ -91,13 +97,18 @@ Scrape | List
 {% endblock %}
 {% block script %}
 <script>
+// edit
+const url_task_info_edit = "{% url 'task_info_edit' %}";
+let new_interval_n = null;
+let new_interval_p = null;
+let new_email = null;
 // delete
 const url_delete_obj = "{% url 'delete_obj' %}"
 // search
 const url_search = "{% url 'search' %}";
-const url_from = "{% url 'task_with_category' category_id %}";
+const url_from = "{% url 'task_with_category' category.id %}";
 // 一键开始/停止任务
-const category_id = '{{ category_id }}';
+const category_id = '{{ category.id }}';
 const url_start_or_stop_all = "{% url 'start_or_stop_all' %}";
 const url_change_task_status = "{% url 'change_task_status' %}";
 </script>

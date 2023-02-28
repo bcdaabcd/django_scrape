@@ -1,9 +1,17 @@
-from django.shortcuts import get_object_or_404,render
+import time,multiprocessing,random
+from django_celery_beat.models import PeriodicTask
+from django.shortcuts import get_object_or_404,render,redirect
+from django.urls import reverse
 from django.core.paginator import Paginator
-from .models import Item,Record,Favorite
 from django.db.models import Count,Max,Min,Window
 from django.db.models.functions import DenseRank
+from django.http import JsonResponse
+from django.db.utils import IntegrityError
+from django.contrib import messages
+from django.core import exceptions
 from django.conf import settings
+from .models import Item,Record,Favorite
+from dj_scrape.utils import get_certain_item_info,save_item_or_add_record_on_exist_item
 
 def item_list_common_data(request,all_item_list):
     context = {}
@@ -77,3 +85,111 @@ def item_detail(request,item_id):
     context['min_price'] = item.record_set.order_by('price')[0].price
     context['max_price'] = item.record_set.order_by('price').reverse()[0].price
     return render(request,'item_detail.html',context)
+
+
+# 添加和取消收藏
+def fav_add(request):
+    if request.method == "GET":
+        item_id = int(request.GET.get('item_id'))
+        in_fav = request.GET.get('in_fav')
+        item = Item.objects.get(id=item_id)
+        data = {}
+        if in_fav == 'false':
+            item.is_favorite = True
+            item.save()
+            try:
+                Favorite.objects.create(item=item)
+            except IntegrityError:
+                data['i'] = "添加失败，已存在"
+            else:
+                data['i'] = "添加成功"
+        elif in_fav == 'true':
+            item.is_favorite = False
+            item.save()
+            try:
+                Favorite.objects.get(item=item).delete()
+            except exceptions.ObjectDoesNotExist:
+                data['i'] = "删除失败，该收藏不存在"
+            else:
+                data['i'] = "删除成功"
+        data['before'] ,data['after'] = in_fav, item.is_favorite
+        data['name'] = item.name
+        return JsonResponse(data)
+    
+# 一键爬取
+def function_of_check_all(url):
+    try:
+        item_info = get_certain_item_info(url)
+    except:
+        return 0
+    else:
+        save_item_or_add_record_on_exist_item(url,item_info)
+        return 1
+# def check_all(request):
+#     referer = request.META.get('HTTP_REFERER',reverse('item_list'))
+#     if request.method == "POST":
+#         if request.POST.get("check") == 'all_fav_list':
+#             all_items = Item.objects.filter(is_favorite=True)
+#         elif request.POST.get("check") == 'all_item_list': 
+#             all_items = Item.objects.all()
+#         elif request.POST.get('check') == 'this_page_item_list' and request.POST.get('page_num'):
+#             all_all_items = Item.objects.all()
+#             cur_page = int(request.POST.get('page_num'))
+#             num = settings.EACH_PAGE_OBJ_NUM
+#             all_items = all_all_items[num*(cur_page-1):num*cur_page]
+#         start_time = time.time()
+#         urls = all_items.values_list('url',flat=True)
+#         result_list = []
+#         for i in range(len(urls)):
+#             result_list.append(function_of_check_all(urls[i]))
+#         end_time = time.time()
+#         info = f"共{all_items.count()}条,成功{result_list.count(1)}条,耗时{round(end_time - start_time,3)}秒"
+#         messages.add_message(request,messages.SUCCESS,info)
+#         if 0 in result_list:
+#             error_info = f",失败{result_list.count(0)}条"
+#             messages.error(request,error_info)
+#     return redirect(referer)
+
+# 合并相同记录
+def merge_same_record(request):
+    item_id = request.GET.get('item_id')
+    item = Item.objects.get(id=item_id)
+    records = item.record_set.order_by('-scrape_time')
+    for r in range(1,len(records)-1):
+        if records[r].price == records[r-1].price and records[r].price == records[r+1].price:
+            records[r].delete()
+    return JsonResponse({})
+
+
+
+def check_all(request):
+    referer = request.META.get('HTTP_REFERER',reverse('item_list'))
+    if request.method == "POST":
+        if request.POST.get("check") == 'all_fav_list':
+            all_items = Item.objects.filter(is_favorite=True)
+        elif request.POST.get("check") == 'all_item_list': 
+            all_items = Item.objects.all()
+        elif request.POST.get('check') == 'this_page_item_list' and request.POST.get('page_num'):
+            all_all_items = Item.objects.all()
+            cur_page = int(request.POST.get('page_num'))
+            num = settings.EACH_PAGE_OBJ_NUM
+            all_items = all_all_items[num*(cur_page-1):num*cur_page]
+        start_time = time.time()
+        urls = all_items.values_list('url',flat=True)
+        for url in urls:
+            t = PeriodicTask.objects.create(
+                name = str(random.randint(10001,20000)),
+                
+            )
+
+
+        result_list = []
+        for i in range(len(urls)):
+            result_list.append(function_of_check_all(urls[i]))
+        end_time = time.time()
+        info = f"共{all_items.count()}条,成功{result_list.count(1)}条,耗时{round(end_time - start_time,3)}秒"
+        messages.add_message(request,messages.SUCCESS,info)
+        if 0 in result_list:
+            error_info = f",失败{result_list.count(0)}条"
+            messages.error(request,error_info)
+    return redirect(referer)

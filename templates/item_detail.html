@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load item_tags %}
 
 {% block title %}
-Scrape | Detail
+Detail
 {% endblock %}
 
 {% block header_extends %}
@@ -12,7 +13,7 @@ Scrape | Detail
 {% block body %}
 <div class="con">
     <div class="left">
-        <div class="top"><h2>({{ record_num }}) Records<a href="{% url 'item_list' %}">Back</a></h2></div>
+        <div class="top"><h2>({{ record_num }}) Records<a href="{% from_where request %}">Back</a></h2></div>
         <div class="item-info">
             <p class="pictures">
                 {% for src in srcs %}
@@ -27,6 +28,7 @@ Scrape | Detail
             <p>highest: {{ max_price }}</p>
         </div>
         <div class="table-con">
+            <p class="merge" onclick="merge_same_record('{{item.id}}')">合并相同项</p>
             <table class="record">
                 <thead>
                     <tr>
@@ -56,6 +58,18 @@ Scrape | Detail
 {% endblock %}
 {% block script %}
 <script>
+function merge_same_record(item_id){
+    $.ajax({
+        url: "{% url 'merge_same_record' %}",
+        type: 'GET',
+        data: {'item_id':item_id},
+        dataType: 'json',
+        success: function(d){
+            window.location.reload();
+        },
+        error: function(xhr){console.log(xhr);}
+    })
+}
 let pc = $('td.price_change');
 for(let i=0;i<pc.length;i++){
     te = pc[i].textContent;

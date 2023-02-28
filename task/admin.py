@@ -4,7 +4,7 @@ from task.models import TaskCategory
 
 @admin.register(TaskCategory)
 class TaskCategoryAdmin(admin.ModelAdmin):
-    list_display = ['id','content_type']
+    list_display = ['id','name']
 
 
     

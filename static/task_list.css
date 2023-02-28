@@ -1,3 +1,6 @@
+.hidden{
+    display: none!important;
+}
 .con{
     margin:calc(5vh + 60px) auto 10vh;
     width: 85vw;
@@ -163,6 +166,9 @@ span.delete:active{
 /* right */
 .right{
     flex: 0 1 28%;
+    position: sticky;
+    top: 100px;
+    height: max-content;
 }
 .right>.categories{
     background-color: #fff;

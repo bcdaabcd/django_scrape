@@ -1,10 +1,8 @@
 import json,re
-from django.contrib.contenttypes.models import ContentType
-from django_celery_beat.models import PeriodicTask,IntervalSchedule,CrontabSchedule
+from django_celery_beat.models import PeriodicTask,IntervalSchedule
 from django.shortcuts import render
 from django.core.paginator import Paginator
 from django.http import JsonResponse
-from django.db.utils import DataError
 from django.conf import settings
 from items.models import Item
 from task.models import TaskCategory
@@ -38,47 +36,26 @@ def task_list(request):
     all_tasks = PeriodicTask.objects.exclude(name="celery.backend_cleanup").order_by('-start_time')
     for t in all_tasks:
         info_dict = json.loads(t.kwargs)
-        url = info_dict['url']
-        t.item = Item.objects.get(url=url)
+        t.item = Item.objects.get(url=info_dict['url'])
         t.email = info_dict['email'] if info_dict['email'] else ""
-        if t.interval:
-            t.type = t.interval.__class__.__name__.lower().replace('schedule','')
-        elif t.crontab:
-            t.type = t.crontab.__class__.__name__.lower().replace('schedule','')
-        # t.type_id = ContentType.objects.get(model=t.type).taskcategory.id # 这行没用到
+        t.email_when = info_dict['email when'].replace('email ','')
+        t.price_lt = info_dict['price lt']
         t.save()
     context = task_list_common_data(request,all_tasks)
-    categories = []
-    for taskcategory in TaskCategory.objects.all():
-        taskcategory.name = taskcategory.content_type.model_class().__name__
-        taskcategory.save()
-        categories.append(taskcategory)
-    context['categories'] = categories
+    context['categories'] = TaskCategory.objects.all()
     return render(request,'task_list.html',context)
 
 def task_with_category(request,category_id):
-    schedule_ct = ContentType.objects.get(taskcategory=category_id)
-    schedule_class = schedule_ct.model_class()
-    all_tasks = PeriodicTask.objects.none()
-    if category_id == 2:
-        all_schedukes = schedule_class.objects.exclude(minute=0,hour=4,day_of_week="*",day_of_month="*",month_of_year="*")
-    elif category_id == 1:
-        all_schedukes = schedule_class.objects.all()
-    for schedule in all_schedukes:
-        if schedule.periodictask_set.count() > 0:
-            all_tasks = all_tasks | schedule.periodictask_set.all()
+    category = TaskCategory.objects.get(id=category_id)
+    all_tasks = PeriodicTask.objects.exclude(name="celery.backend_cleanup").filter(kwargs__contains=category.name.replace('email ',''))
     for t in all_tasks:
         info_dict = json.loads(t.kwargs)
         t.item = Item.objects.get(url=info_dict['url'])
-        t.email = info_dict['email'] if info_dict['email'] else ""
-        if t.interval:
-            t.type = t.interval.__class__.__name__.lower().replace('schedule','')
-        elif t.crontab:
-            t.type = t.crontab.__class__.__name__.lower().replace('schedule','')
+        t.email = info_dict['email']
+        t.email_when = info_dict['email when']
         t.save()
     context = task_list_common_data(request,all_tasks)
-    context['typename'] = schedule_class.__name__
-    context['category_id'] = category_id
+    context['category'] = category
     return render(request,'task_with_category.html',context)
 
 
@@ -110,7 +87,6 @@ def start_or_stop_all(request):
     fro = request.GET.get('from')
     action = request.GET.get('action')
     data = {}
-    category_id = request.GET.get('category_id')
     if fro == 'task_list':
         if action == 'start':
             for t in PeriodicTask.objects.exclude(name="celery.backend_cleanup"):
@@ -122,19 +98,20 @@ def start_or_stop_all(request):
                 if t.enabled == True:
                     t.enabled = False
                     t.save()
-    # elif fro == 'task_with_category':
-    #     category_id = int(category_id)
-    #     if action == 'start':
-    #         for t in Task.objects.filter(category_id=category_id):
-    #             if t.status == False:
-    #                 t.status = True
-    #                 t.save()
-    #     elif action == 'stop':
-    #         for t in Task.objects.filter(category_id=category_id):
-    #             if t.status == True:
-    #                 t.status = False
-    #                 t.save()
-    data['category_id'] = category_id
+    elif fro == 'task_with_category':
+        category_id = int(request.GET.get('category_id'))
+        category = TaskCategory.objects.get(id=category_id)
+        all_tasks = PeriodicTask.objects.exclude(name="celery.backend_cleanup").filter(kwargs__contains=category.name.replace('email ',''))
+        if action == 'start':
+            for t in all_tasks:
+                if t.enabled == False:
+                    t.enabled = True
+                    t.save()
+        elif action == 'stop':
+            for t in all_tasks:
+                if t.enabled == True:
+                    t.enabled = False
+                    t.save()
     data['from'] = fro
     data['action'] = action
     return JsonResponse(data)
@@ -142,7 +119,7 @@ def start_or_stop_all(request):
 def task_info_edit(request):
     if request.method == 'GET':
         task_id = request.GET.get('task_id')
-        new_value = request.GET.get('new_value')
+        new_value = request.GET.get('new_email')
         target = request.GET.get('target')
         task = PeriodicTask.objects.get(id=task_id)
         info = json.loads(task.kwargs)
@@ -151,23 +128,24 @@ def task_info_edit(request):
             info['email'] = new_value
             task.kwargs = json.dumps(info)
             d['new_email'] = new_value
-            task.save()
         elif target == 'interval':
-            try:
-                num = int(request.GET.get('interval_num'))
-            except ValueError: # 为空
-                d['error_info'] = "值不可为空"
-            except DataError:
-                d['error_info'] = "该数字超过上限，请重新输入"
-            else:
-                if num == 0:
-                    raise ValueError
+            num = int(request.GET.get('interval_num'))
             period = request.GET.get('interval_period')
             task.interval.every = num
             task.interval.period = period
             task.interval.save()
             d['num'] = num
             d['period'] = period
+        elif target == 'email when':
+            new_email_when = request.GET.get('new_email_when')
+            if new_email_when == 'when price lower than':
+                new_price_lt = request.GET.get('new_price_lt')
+                info['price lt'] = new_price_lt
+                d['new_price_lt'] = new_price_lt
+            info['email when'] = new_email_when
+            task.kwargs = json.dumps(info)
+            d['new_email_when'] = new_email_when
+        task.save()
         d['target'] = target
         d['task_id'] = task_id
         d['new_task_info'] = info
