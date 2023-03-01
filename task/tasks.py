@@ -73,7 +73,11 @@ def periodic_task(*args,**kwargs):
             return "查询完成"
 
 
+# @app.task
+# def periodic_task(*args,**kwargs):
+#     print('Jjjjjjj')
+#     return 'test'
 
-# celery -A dj_scrape beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+
 # celery -A dj_scrape worker -l info -P eventlet -c 8
 

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load item_tags %}
 
 {% block title %}
 Favorite List
@@ -36,13 +37,16 @@ Favorite List
                 ({{ item.record_num }})&nbsp;<a href="{% url 'item_detail' item.pk %}?from={{request.get_full_path}}">{{ item.name|truncatechars:120 }}</a>
             </div>
             <div class="item-info">
-                <div class="price-info">
+                <div class="price-info" style="flex:1 0 auto;">
                     <div class="price-info-detail">
                         <p><span>last price:</span><span>{{ item.last_price }}</span></p>
                         <p><span>lowest:</span><span>{{ item.min_price }}</span></p>
                         <p><span>highest:</span><span>{{ item.max_price }}</span></p>
                     </div>
                 </div>
+                <span class="love {% fav_status item %}" 
+                    onclick="fav_add(this,'{{item.id}}')">&#10084
+                </span>
             </div>            
             <p class="record-date">
                 from <span class="record-date">{{ item.first_record_date|date:"Y-m-d" }}</span> to <span class="record-date">{{ item.last_record_date|date:"Y-m-d" }}</span>
@@ -107,6 +111,38 @@ let check_all_form=document.querySelector("form#check_all_form");
 let check_all_bu=document.querySelector("button#check_all");
 check_all_bu.onclick=function(){
     check_all_form.submit();
+}
+// 收藏
+function fav_add(obj,item_id){
+    let in_fav = obj.classList.contains('selected');
+    if(obj.classList.contains('selected')===false){
+        obj.classList.add('selected');
+    }else{
+        obj.classList.remove('selected');
+    }
+    let aurl = "{% url 'item_detail' 0  %}";
+    detail_url = aurl.replace(/0/,item_id);
+    $.ajax({
+        url: "{% url 'fav_add' %}",
+        type: "GET",
+        data: {
+            'item_id': item_id,
+            'in_fav': in_fav,
+        },
+        cache: false,
+        success:function(d){
+            let name = d['name'];
+            $('.item-name a').each(function(){
+                if(this.textContent === name){
+                    $(this).parents('.item').remove();
+                };
+            });
+            console.log(d);
+        },
+        error:function(xhr){
+            console.log(xhr);
+        }
+    });
 }
 </script>
 <script src="{% static 'js/all_list_common.js' %}"></script>

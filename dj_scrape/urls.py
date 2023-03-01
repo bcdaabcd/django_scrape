@@ -22,10 +22,6 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', view=views.input,name='url_input'),
-    # path('sign_in',views.sign_in,name='sign_in'),
-    # path('sign_up',views.sign_up,name='sign_up'),
-    # path('log_out',views.log_out,name='log_out'),
-    # path('user_info',views.user_info,name='user_info'),
     path('item/', include('items.urls')),
     path('task/',include('task.urls')),
     
